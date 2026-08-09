@@ -1,9 +1,5 @@
 # 📈 UAPOML: Uncertainty-Aware Portfolio Optimization using Machine Learning
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Tests: passing](https://img.shields.io/badge/tests-13%20passed-brightgreen.svg)]()
 
 > **A Technically Rigorous Quantitative Research Framework Evaluating Whether Predictive Uncertainty Penalties in Machine Learning Return Forecasts Produce Robust Risk-Adjusted Portfolios.**
 
@@ -174,10 +170,6 @@ streamlit run app.py
 
 ---
 
-## 📚 Technical Interview Resources
-- **[Interview Preparation Document](reports/interview_prep.md):** 30s/1m/3m pitches, design decisions, and 40+ deep quantitative Q&As.
-- **[Resume Claim Verification](reports/resume_claims.md):** Line-by-line mapping of resume bullets to experimental code and verified empirical evidence.
-- **[Full Technical Report](reports/final_report.md):** Comprehensive 20-section academic research paper.
 
 ---
 
