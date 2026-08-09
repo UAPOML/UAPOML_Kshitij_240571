@@ -1,0 +1,146 @@
+# UAPOML Configuration File
+# Uncertainty-Aware Portfolio Optimization using Machine Learning
+
+project:
+  name: "UAPOML"
+  version: "1.0.0"
+  random_seed: 42
+
+data:
+  # 20 highly liquid US large-cap stocks across sectors + SPY benchmark
+  universe:
+    - "AAPL"   # Tech (Consumer Electronics)
+    - "MSFT"   # Tech (Software / Cloud)
+    - "GOOGL"  # Tech (Search / AdTech)
+    - "AMZN"   # Consumer Discretionary (E-Commerce / Cloud)
+    - "NVDA"   # Tech (Semiconductors)
+    - "JPM"    # Financials (Diversified Banking)
+    - "BAC"    # Financials (Retail / Commercial Banking)
+    - "UNH"    # Healthcare (Managed Care)
+    - "JNJ"    # Healthcare (Pharmaceuticals)
+    - "PFE"    # Healthcare (Biopharma)
+    - "XOM"    # Energy (Integrated Oil & Gas)
+    - "CVX"    # Energy (Oil & Gas)
+    - "PG"     # Consumer Staples (Household Products)
+    - "KO"     # Consumer Staples (Beverages)
+    - "HD"     # Consumer Discretionary (Home Improvement)
+    - "COST"   # Consumer Staples (Retail Wholesale)
+    - "CAT"    # Industrials (Machinery)
+    - "HON"    # Industrials (Conglomerate)
+    - "DIS"    # Communication Services (Media / Entertainment)
+    - "BRK-B"  # Financials (Multi-sector Conglomerate)
+  benchmark: "SPY"
+  
+  start_date: "2015-01-01"
+  end_date: "2024-12-31"
+  raw_data_dir: "data/raw"
+  processed_data_dir: "data/processed"
+  use_cached: true
+
+features:
+  # Primary target: future k-day return
+  target_horizon_days: 5
+  use_log_returns: false
+  
+  # Return lags
+  return_lags: [1, 5, 10, 20]
+  
+  # Moving average windows for momentum & trend
+  ma_windows: [10, 50, 200]
+  
+  # Volatility rolling windows
+  vol_windows: [5, 20]
+  
+  # Momentum windows
+  mom_windows: [5, 10, 20]
+  
+  # Technical indicators
+  rsi_window: 14
+  macd_fast: 12
+  macd_slow: 26
+  macd_signal: 9
+  atr_window: 14
+  volume_windows: [5, 20]
+
+validation:
+  # Walk-forward validation settings
+  scheme: "rolling"              # "rolling" or "expanding"
+  train_window_days: 756         # ~3 years of trading days
+  val_window_days: 126           # ~6 months
+  test_step_days: 5              # Rebalance / step frequency (every 5 trading days / weekly)
+  min_train_days: 504            # ~2 years minimum training
+
+models:
+  primary: "random_forest"
+  candidates:
+    - "ridge"
+    - "random_forest"
+    - "gradient_boosting"
+  
+  ridge:
+    alpha: 10.0
+  
+  random_forest:
+    n_estimators: 50
+    max_depth: 5
+    min_samples_split: 10
+    min_samples_leaf: 5
+    max_features: "sqrt"
+    random_state: 42
+    n_jobs: 1
+  
+  gradient_boosting:
+    n_estimators: 100
+    learning_rate: 0.05
+    max_depth: 4
+    min_samples_split: 10
+    min_samples_leaf: 5
+    random_state: 42
+
+uncertainty:
+  method: "ensemble_variance"    # "ensemble_variance" or "residual_bootstrap"
+  n_bootstrap: 20
+  include_residual_variance: true
+  residual_window: 60
+  epsilon: 0.0001                # Small constant to prevent division by zero
+
+portfolio:
+  risk_aversion_lambda: 2.0      # Variance penalty in MVO
+  uncertainty_gamma: 1.5         # Uncertainty penalty in UAPOML objective
+  uncertainty_score_epsilon: 0.001
+  
+  constraints:
+    long_only: true              # w_i >= 0
+    fully_invested: true         # sum(w_i) = 1.0
+    max_asset_weight: 0.15       # Maximum 15% allocation per stock
+    min_asset_weight: 0.00       # Minimum 0% allocation
+  
+  covariance:
+    method: "ledoit_wolf"        # "sample" or "ledoit_wolf"
+    lookback_days: 126           # ~6 months of daily covariance history
+
+backtest:
+  initial_capital: 100000.0      # $100,000 USD
+  rebalance_frequency_days: 5    # Weekly rebalancing
+  transaction_cost_bps: 10.0     # 10 basis points (0.10%) per one-way turnover
+  risk_free_rate_annual: 0.02    # 2.0% annual risk-free rate for Sharpe / Sortino
+  trading_days_per_year: 252
+
+robustness:
+  transaction_costs_bps: [0, 5, 10, 15, 20, 30]
+  risk_aversions_lambda: [0.5, 1.0, 2.0, 3.0, 5.0]
+  uncertainty_penalties_gamma: [0.0, 0.5, 1.0, 1.5, 2.0, 3.0]
+  rebalance_frequencies_days: [1, 5, 10, 21]
+  regimes:
+    - name: "2018 Trade War & Tech Pullback"
+      start: "2018-01-01"
+      end: "2018-12-31"
+    - name: "2020 COVID Shock & Recovery"
+      start: "2020-01-01"
+      end: "2020-12-31"
+    - name: "2022 Inflation & Rate Hike Bear Market"
+      start: "2022-01-01"
+      end: "2022-12-31"
+    - name: "2023-2024 AI Rally & Rate Stabilization"
+      start: "2023-01-01"
+      end: "2024-12-31"
